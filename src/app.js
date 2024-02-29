@@ -44,18 +44,19 @@ app.get("/", (req, res) => {
   }
 });
 
-app.get("/student/:id", (req, res) => {
+const getStudentDetails = (req, res) => {
   const { id } = req.params;
   const queryString = `SELECT * FROM Student where id=${id}`;
   try {
-    dbConnection().query(queryString, (err, rows, field) => {
+    dbConnection().query(queryString, async (err, rows, field) => {
       if (err) {
         console.log("something went wrong", err);
         res.sendStatus(500);
         return;
       }
       if (rows.length > 0) {
-        console.log("Information fetched successfully of all students ");
+        console.log("Served from DB");
+        await redisClient.set(id, JSON.stringify(rows));
         res.status(200).json(rows);
       } else {
         console.log("no student found saved in table");
@@ -66,7 +67,25 @@ app.get("/student/:id", (req, res) => {
   } catch (error) {
     console.log(error);
   }
-});
+};
+
+const checkRedisCache = (req, res, next) => {
+  const { id } = req.params;
+  redisClient.get(id, (err, data) => {
+    if (err) {
+      console.log("something went wrong", err);
+      return;
+    }
+    if (data != null) {
+      console.log("Served from Redis");
+      res.status(200).json(JSON.parse(data));
+    } else {
+      next();
+    }
+  });
+};
+
+app.get("/student/:id", checkRedisCache, getStudentDetails);
 
 app.post("/", (req, res) => {
   if (Object.keys(req.body).length > 0) {
@@ -121,18 +140,3 @@ app2.get("/", (req, res) => res.send("Hello from the other environment!"));
 app2.listen(process.env.PORT2 || PORT2, () =>
   console.log(`Server is up & running on port ${PORT2}`)
 );
-
-const checkRedisCache = (req, res, next) => {
-  const { id } = req.params;
-  redisClient.get(id, (err, data) => {
-    if (err) {
-      console.log("something went wrong", err);
-      return;
-    }
-    if (data != null) {
-      res.status(200).json(data);
-    } else {
-      next();
-    }
-  });
-};
