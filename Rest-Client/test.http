@@ -1,0 +1,16 @@
+
+get {{hostname}}
+
+###
+get {{hostname}}/student/1
+###
+post {{hostname}}
+Content-Type: application/json
+
+{
+    "message": "Hello World!"
+}
+
+###
+get {{hostname}}/auth-endpoint
+Authorization: {{apiKey}}
