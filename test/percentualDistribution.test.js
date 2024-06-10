@@ -1,18 +1,10 @@
-const csv = require("csvtojson");
-const percentualDistribution = require("./../src/percentualDistribution");
+const csvtojson = require("./../src/utils/csvtojson.js");
+const { percentualDistribution } = require("./../src/controllers/percentualDistribution.controller.js");
 
-// const testFilePath = "./test/testDataListings.csv";
+const testFilePath = "test/testDataListings.csv";
 
-const csvtojson = async (filePath) => {
-  try {
-    return await csv().fromFile(filePath);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-describe("Autoscout24 test App", () => {
-  it("Should return € 10,- for seller_type = private", async () => {
-    // const testListingsArray = await csvtojson(testFilePath);
-  });
+describe("Car Data Analysis", () => {
+    it("Should return € 10,- for seller_type = private", async () => {
+        // const testListingsArray = await csvtojson(testFilePath);
+    });
 });
